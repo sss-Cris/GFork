@@ -1,0 +1,48 @@
+{
+    "dataset_reader": {
+        "type": "chunk_reader",
+        "transformer_model_name": "bert-base-uncased"
+    },
+    "validation_dataset_reader": {
+        "type": "chunk_reader",
+        "validation": true,
+        "transformer_model_name": "bert-base-uncased"
+    },
+    "train_data_path": "datasets/chunk_oia/train.json",
+    "validation_data_path": "datasets/chunk_oia/test.json",
+    "model": {
+        "type": "chunk_model",
+        "embedding_dropout": 0.1,
+        "bert_model": "bert-base-uncased",
+        "tuple_metric": {
+            "type": "chunk_oia_match",
+            "output_path": "trained_model/test_for_fun",
+            "dev_set": "datasets/chunk_oia/dev.json"
+        }
+    },
+    "data_loader": {
+        "type": "multiprocess",
+        "batch_size": 32,
+        "shuffle": true
+    },
+    "trainer": {
+        "optimizer": {
+            "type": "adamw",
+            "lr": 5e-5,
+            "weight_decay": 0.01,
+            "parameter_groups": [
+                [["bias", "LayerNorm.bias", "LayerNorm.weight", "layer_norm.weight"], {"weight_decay": 0.0}]
+            ]
+        },
+        "learning_rate_scheduler": {
+            "type": "slanted_triangular",
+            "num_epochs": 5,
+            "num_steps_per_epoch": 1000
+        },
+        "num_epochs": 5,
+        "validation_metric": "+bound_f1",
+        "num_serialized_models_to_keep": 1,
+        "should_log_learning_rate": true,
+        "cuda_device": 0
+    }
+}
